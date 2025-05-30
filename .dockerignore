@@ -1,0 +1,7 @@
+# /home/awood15/personal/Lloyds/.dockerignore
+node_modules
+npm-debug.log
+Dockerfile
+.dockerignore
+.git
+.gitignore
