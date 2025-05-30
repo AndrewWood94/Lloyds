@@ -1,0 +1,13 @@
+# /home/awood15/personal/Lloyds/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: lloyds-service
+spec:
+  type: LoadBalancer # This will provision a Google Cloud Load Balancer
+  selector:
+    app: lloyds-api # This must match the labels in your Deployment's pod template
+  ports:
+  - protocol: TCP
+    port: 80       # Port the Load Balancer listens on
+    targetPort: 3000 # Port your container listens on (must match containerPort in Deployment)
