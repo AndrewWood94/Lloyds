@@ -1,0 +1,32 @@
+# /home/awood15/personal/Lloyds/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lloyds-deployment
+spec:
+  replicas: 2 # Number of desired instances (pods)
+  selector:
+    matchLabels:
+      app: lloyds-api
+  template:
+    metadata:
+      labels:
+        app: lloyds-api
+    spec:
+      containers:
+      - name: lloyds-container
+        image: europe-west2-docker.pkg.dev/lloyds-api-123/lloyds/lloyds:v1 # <-- YOUR IMAGE
+        ports:
+        - containerPort: 3000 # Port your application listens on inside the container
+        env: # Optional: Define environment variables
+        - name: PORT
+          value: "3000"
+        # - name: DATABASE_URL
+        #   value: "your_database_connection_string" # Consider using Secrets for sensitive data
+        resources: # Optional: Define resource requests and limits
+          requests:
+            memory: "64Mi"
+            cpu: "250m" # 0.25 CPU core
+          limits:
+            memory: "128Mi"
+            cpu: "500m" # 0.5 CPU core
