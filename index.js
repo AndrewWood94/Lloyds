@@ -18,6 +18,9 @@ const pool = new Pool(dbConfig);
 
 app.use(express.json());
 
+app.get('/', (req, res) => {
+  res.status(200).send('OK');
+});
 
 app.get('/api/hello', (req, res) => {
   res.json({ message: 'Hello from my Node.js API!' });
@@ -42,7 +45,19 @@ app.post('/api/leagues', async (req, res) => {
 
 app.get('/api/leagues', async (req, res) => {
   try {
-    const allLeagues = await pool.query('SELECT * FROM leagues ORDER BY created_at DESC');
+    const { country } = req.query; // Get the optional country query parameter
+    let queryText = 'SELECT * FROM leagues';
+    const queryParams = [];
+
+    if (country) {
+      queryText += ' WHERE country = $1';
+      queryParams.push(country);
+    }
+
+    queryText += ' ORDER BY created_at DESC';
+
+    const allLeagues = await pool.query(queryText, queryParams);
+
     res.json(allLeagues.rows);
   } catch (err) {
     console.error(err.stack);
@@ -101,21 +116,44 @@ app.post('/api/teams', async (req, res) => {
 
 app.get('/api/teams', async (req, res) => {
   try {
-    // Join with leagues table to get league name
-    const allTeams = await pool.query(`
-      SELECT t.id, t.name, t.created_at, l.name AS league_name, l.country AS league_country
+    const { country, league_name: leagueNameQuery } = req.query; // Get optional query parameters
+    let queryText = `
+      SELECT t.id, t.name AS team_name, t.created_at, l.name AS league_name, l.country AS league_country
       FROM teams t
       LEFT JOIN leagues l ON t.league_id = l.id
-      ORDER BY t.name ASC
-    `);
-    res.json(allTeams.rows);
+    `;
+    const queryParams = [];
+    const conditions = [];
+
+    if (country) {
+      queryParams.push(country);
+      conditions.push(`l.country = $${queryParams.length}`);
+    }
+    if (leagueNameQuery) {
+      queryParams.push(leagueNameQuery);
+      conditions.push(`l.name = $${queryParams.length}`);
+    }
+    
+    if (conditions.length > 0) {
+      queryText += ` WHERE ${conditions.join(' AND ')}`;
+    }
+    queryText += ' ORDER BY t.name ASC';
+
+    const result = await pool.query(queryText, queryParams);
+    res.json(result.rows);
+      
+
   } catch (err) {
     console.error(err.stack);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-app.listen(port, () => {
-  console.log(`API server listening on port ${port}`);
-});
+if (require.main === module) {
+  app.listen(port, () => {
+    console.log(`API server listening on port ${port}`);
+  });
+}
+
+module.exports = app;
 
