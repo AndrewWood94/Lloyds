@@ -29,7 +29,8 @@ const createTables = async () => {
       id SERIAL PRIMARY KEY,
       name VARCHAR(255) NOT NULL,
       league_id INTEGER REFERENCES leagues(id) ON DELETE CASCADE,
-      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE (name, league_id)
     )
   `);
   console.log("Table 'teams' initialized or already exists.");

@@ -52,27 +52,49 @@ app.get('/api/leagues', async (req, res) => {
 
 // --- Teams Endpoints ---
 app.post('/api/teams', async (req, res) => {
+  const { name, league_name, league_country } = req.body; // Expecting league_id to be provided
   try {
-    const { name, league_id } = req.body; // Expecting league_id to be provided
     if (!name) {
       return res.status(400).json({ error: 'Team name is required' });
     }
-    if (league_id && isNaN(parseInt(league_id))) {
-      return res.status(400).json({ error: 'Valid league_id (integer) is required if provided' });
+    if (!league_name) {
+      return res.status(400).json({ error: 'League name is required to associate the team.' });
     }
 
-    // Optional: Check if league_id exists before inserting
-    if (league_id) {
-      const leagueExists = await pool.query('SELECT id FROM leagues WHERE id = $1', [league_id]);
-      if (leagueExists.rows.length === 0) {
-        return res.status(404).json({ error: `League with id ${league_id} not found.` });
+    let league_id;
+    // Check for leagues with the given name
+    const existingLeaguesByName = await pool.query('SELECT id, country FROM leagues WHERE name = $1', [league_name]);
+
+    if (existingLeaguesByName.rows.length === 0) {
+      return res.status(404).json({ error: `No league found with name: "${league_name}"` });
+    } else if (existingLeaguesByName.rows.length === 1) {
+      // Only one league with this name, country is optional (or can be used for verification if provided)
+      const foundLeague = existingLeaguesByName.rows[0];
+      if (league_country && league_country !== foundLeague.country) {
+        return res.status(404).json({ 
+          error: `League "${league_name}" exists, but not in country "${league_country}". It is in "${foundLeague.country || 'N/A'}".` 
+        });
       }
+      league_id = foundLeague.id;
+    } else {
+      // Multiple leagues with this name, country is now mandatory
+      if (!league_country) {
+        return res.status(400).json({ error: `Multiple leagues exist with name "${league_name}". Please provide league_country.` });
+      }
+      const specificLeague = existingLeaguesByName.rows.find(l => l.country === league_country);
+      if (!specificLeague) {
+        return res.status(404).json({ error: `League "${league_name}" not found in country "${league_country}".` });
+      }
+      league_id = specificLeague.id;
     }
 
-    const newTeam = await pool.query('INSERT INTO teams (name, league_id) VALUES ($1, $2) RETURNING *', [name, league_id || null]);
+    const newTeam = await pool.query('INSERT INTO teams (name, league_id) VALUES ($1, $2) RETURNING *', [name, league_id]);
     res.status(201).json(newTeam.rows[0]);
   } catch (err) {
     console.error(err.stack);
+    if (err.code === '23505') { // Unique constraint violation
+      return res.status(409).json({ error: `Team with name "${name}" already exists in this league.` });
+    }
     res.status(500).json({ error: 'Internal server error' });
   }
 });

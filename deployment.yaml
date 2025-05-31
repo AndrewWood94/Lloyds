@@ -14,19 +14,50 @@ spec:
         app: lloyds-api
     spec:
       containers:
-      - name: lloyds-container
-        image: europe-west2-docker.pkg.dev/lloyds-api-123/lloyds/lloyds:v1 # <-- YOUR IMAGE
+      - name: lloyds-app-container
+        image: europe-west2-docker.pkg.dev/lloyds-api-123/lloyds-repository/lloyds-api-image:v1 # <-- YOUR IMAGE
         ports:
-        - containerPort: 3000 # Port your application listens on inside the container
-        env: # Optional: Define environment variables
+        - containerPort: 3000 
+        env:
         - name: PORT
           value: "3000"
-        # - name: DATABASE_URL
-        #   value: "your_database_connection_string" # Consider using Secrets for sensitive data
+        - name: NODE_ENV
+          value: "production"
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: lloyds-db-credentials # Must match the name of your Secret
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: lloyds-db-credentials # Must match the name of your Secret
+              key: DB_PASSWORD
+        - name: DB_NAME
+          value: "lloyds_api_db"
+        - name: DB_HOST
+          value: "127.0.0.1"
+        - name: DB_PORT
+          value: "5432"
         resources: # Optional: Define resource requests and limits
           requests:
             memory: "64Mi"
-            cpu: "250m" # 0.25 CPU core
+            cpu: "150m" # 0.25 CPU core
           limits:
             memory: "128Mi"
             cpu: "500m" # 0.5 CPU core
+      - name: cloud-sql-proxy
+        image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.8.0
+        args:
+          - "--structured-logs"
+          - "--port=5432"
+          - "lloyds-api-123:europe-west2:lloyds-db-instance"
+        securityContext:
+          runAsNonRoot: true # Run as non-root user
+        resources:
+          requests:
+            memory: "20Mi"
+            cpu: "50m"
+          limits:
+            memory: "50Mi"
+            cpu: "100m"
