@@ -4,7 +4,7 @@ kind: Deployment
 metadata:
   name: lloyds-deployment
 spec:
-  replicas: 2 # Number of desired instances (pods)
+  replicas: 1 # Number of desired instances (pods)
   selector:
     matchLabels:
       app: lloyds-api
@@ -42,7 +42,7 @@ spec:
         resources: # Optional: Define resource requests and limits
           requests:
             memory: "64Mi"
-            cpu: "150m" # 0.25 CPU core
+            cpu: "100m" # 0.25 CPU core
           limits:
             memory: "128Mi"
             cpu: "500m" # 0.5 CPU core

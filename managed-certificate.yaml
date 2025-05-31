@@ -1,0 +1,8 @@
+# /home/awood15/personal/Lloyds/managed-certificate.yaml
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: lloyds-api-certificate # Name for this certificate resource
+spec:
+  domains:
+    - api.andrewssite.xyz # <-- REPLACE THIS WITH YOUR ACTUAL DOMAIN/SUBDOMAIN

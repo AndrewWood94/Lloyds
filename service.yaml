@@ -4,7 +4,7 @@ kind: Service
 metadata:
   name: lloyds-service
 spec:
-  type: LoadBalancer # This will provision a Google Cloud Load Balancer
+  type: NodePort
   selector:
     app: lloyds-api # This must match the labels in your Deployment's pod template
   ports:

@@ -1,0 +1,22 @@
+# /home/awood15/personal/Lloyds/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: lloyds-api-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: "lloyds-api-static-ip" # Name of the static IP you reserved
+    networking.gke.io/managed-certificates: "lloyds-api-certificate"  # Name of your ManagedCertificate resource
+    # Force HTTPS redirect
+    kubernetes.io/ingress.allow-http: "false"
+spec:
+  rules:
+  - host: api.andrewssite.xyz # Your new domain
+    http:
+      paths:
+      - path: /* # Route all paths
+        pathType: ImplementationSpecific # Or Prefix
+        backend:
+          service:
+            name: lloyds-service      # Name of your Service
+            port:
+              number: 80              # The 'port' defined in your lloyds-service (not targetPort)
