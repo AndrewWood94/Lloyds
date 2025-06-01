@@ -1,6 +1,7 @@
 // /home/awood15/personal/Lloyds/seed.js
 require('dotenv').config(); // Load environment variables from .env file
 const { Pool } = require('pg');
+const { toTitleCase } = require('./utils'); 
 
 const dbConfig = {
   user: process.env.DB_USER,
@@ -41,33 +42,33 @@ const seedData = async () => {
   if (parseInt(leagueCount.rows[0].count, 10) === 0) {
     console.log('Seeding leagues...');
     const premierLeague = await pool.query(
-        "INSERT INTO leagues (name, country) VALUES ($1, $2) RETURNING id",
-        ['Premier League', 'England']
-      );
-      const laLiga = await pool.query(
-        "INSERT INTO leagues (name, country) VALUES ($1, $2) RETURNING id",
-        ['La Liga', 'Spain']
-      );
-      const bundesliga = await pool.query(
-        "INSERT INTO leagues (name, country) VALUES ($1, $2) RETURNING id",
-        ['Bundesliga', 'Germany']
-      );
-      const serieA = await pool.query(
-        "INSERT INTO leagues (name, country) VALUES ($1, $2) RETURNING id",
-        ['Serie A', 'Italy']
-      );
-      const ligue1 = await pool.query(
-        "INSERT INTO leagues (name, country) VALUES ($1, $2) RETURNING id",
-        ['Ligue 1', 'France']
-      );
-      const championship = await pool.query(
-        "INSERT INTO leagues (name, country) VALUES ($1, $2) RETURNING id",
-        ['Championship', 'England']
-      );
-      const scottishPrem = await pool.query(
-        "INSERT INTO leagues (name, country) VALUES ($1, $2) RETURNING id",
-        ['Scottish Premiership', 'Scotland']
-      );
+      "INSERT INTO leagues (name, country) VALUES ($1, $2) RETURNING id",
+      [toTitleCase('Premier League'), toTitleCase('England')]
+    );
+    const laLiga = await pool.query(
+      "INSERT INTO leagues (name, country) VALUES ($1, $2) RETURNING id",
+      [toTitleCase('La Liga'), toTitleCase('Spain')]
+    );
+    const bundesliga = await pool.query(
+      "INSERT INTO leagues (name, country) VALUES ($1, $2) RETURNING id",
+      [toTitleCase('Bundesliga'), toTitleCase('Germany')]
+    );
+    const serieA = await pool.query(
+      "INSERT INTO leagues (name, country) VALUES ($1, $2) RETURNING id",
+      [toTitleCase('Serie A'), toTitleCase('Italy')]
+    );
+    const ligue1 = await pool.query(
+      "INSERT INTO leagues (name, country) VALUES ($1, $2) RETURNING id",
+      [toTitleCase('Ligue 1'), toTitleCase('France')]
+    );
+    const championship = await pool.query(
+      "INSERT INTO leagues (name, country) VALUES ($1, $2) RETURNING id",
+      [toTitleCase('Championship'), toTitleCase('England')]
+    );
+    const scottishPrem = await pool.query(
+      "INSERT INTO leagues (name, country) VALUES ($1, $2) RETURNING id",
+      [toTitleCase('Scottish Premiership'), toTitleCase('Scotland')]
+    );
     console.log('Leagues seeded.');
 
     console.log('Seeding teams...');
@@ -77,8 +78,8 @@ const seedData = async () => {
         { name: 'Arsenal', league_id: premierLeague.rows[0].id },
         { name: 'Liverpool', league_id: premierLeague.rows[0].id },
         // La Liga
-        { name: 'Real Madrid', league_id: laLiga.rows[0].id },
-        { name: 'FC Barcelona', league_id: laLiga.rows[0].id },
+        { name: 'Real Madrid', league_id: laLiga.rows[0].id }, // Example of direct casing
+        { name: 'FC Barcelona', league_id: laLiga.rows[0].id }, // Example of direct casing
         // Bundesliga
         { name: 'Bayern Munich', league_id: bundesliga.rows[0].id },
         { name: 'Borussia Dortmund', league_id: bundesliga.rows[0].id },
