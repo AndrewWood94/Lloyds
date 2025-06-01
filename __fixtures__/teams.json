@@ -1,6 +1,6 @@
 [
-    { "id": 1, "name": "Arsenal", "league": "1", "created_at": "2024-01-01T10:00:00.000Z" },
-    { "id": 1, "name": "Barcelona", "league": "2", "created_at": "2024-01-01T10:00:00.000Z" },
-    { "id": 1, "name": "Juventus", "league": "3", "created_at": "2024-01-01T10:00:00.000Z" },
-    { "id": 1, "name": "Liverpool", "league": "1", "created_at": "2024-01-01T10:00:00.000Z" }
+    { "id": 1, "name": "Arsenal", "league_id": "1", "created_at": "2024-01-01T10:00:00.000Z" },
+    { "id": 2, "name": "Barcelona", "league_id": "2", "created_at": "2024-01-01T10:00:00.000Z" },
+    { "id": 3, "name": "Juventus", "league_id": "3", "created_at": "2024-01-01T10:00:00.000Z" },
+    { "id": 4, "name": "Liverpool", "league_id": "1", "created_at": "2024-01-01T10:00:00.000Z" }
 ]
