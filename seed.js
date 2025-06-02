@@ -78,6 +78,10 @@ const seedData = async () => {
       "INSERT INTO leagues (name, country) VALUES ($1, $2) RETURNING id",
       [toTitleCase('Scottish Premiership'), toTitleCase('Scotland')]
     );
+    const brazilSerieA = await pool.query(
+      "INSERT INTO leagues (name, country) VALUES ($1, $2) RETURNING id",
+      [toTitleCase('Serie A'), toTitleCase('Brazil')]
+    );
     console.log('Leagues seeded.');
 
     console.log('Seeding teams...');
@@ -104,6 +108,8 @@ const seedData = async () => {
         // Scottish Premiership
         { name: 'Celtic', league_id: scottishPrem.rows[0].id },
         { name: 'Rangers', league_id: scottishPrem.rows[0].id },
+        // Brazil Serie A
+        { name: 'Botafogo', league_id: brazilSerieA.rows[0].id },
       ];
       if (teamsToInsert.length > 0) {
         const teamValues = teamsToInsert.map(team => `('${team.name.replace(/'/g, "''")}', ${team.league_id})`).join(',');
