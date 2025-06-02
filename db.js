@@ -1,7 +1,6 @@
-// /home/awood15/personal/Lloyds/db.js
 const { Pool } = require('pg');
 
-// Load environment variables (ensure .env is loaded if running locally outside of index.js context)
+// Load environment variables if running locally
 require('dotenv').config({ path: require('path').resolve(__dirname, './.env') });
 
 const dbConfig = {

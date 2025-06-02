@@ -1,5 +1,4 @@
-// /home/awood15/personal/Lloyds/index.js
-require('dotenv').config(); // Load environment variables from .env file
+require('dotenv').config(); // Load environment variables from .env file for local run
 const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000; // Use environment variable for port or default to 3000

@@ -1,10 +1,9 @@
-# /home/awood15/personal/Lloyds/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: lloyds-deployment
 spec:
-  replicas: 1 # Number of desired instances (pods)
+  replicas: 1 
   selector:
     matchLabels:
       app: lloyds-api
@@ -15,7 +14,7 @@ spec:
     spec:
       containers:
       - name: lloyds-app-container
-        image: europe-west2-docker.pkg.dev/lloyds-api-123/lloyds-repository/lloyds-api-image:v1 # <-- YOUR IMAGE
+        image: europe-west2-docker.pkg.dev/lloyds-api-123/lloyds-repository/lloyds-api-image:v2 
         ports:
         - containerPort: 3000 
         env:
@@ -26,12 +25,12 @@ spec:
         - name: DB_USER
           valueFrom:
             secretKeyRef:
-              name: lloyds-db-credentials # Must match the name of your Secret
+              name: lloyds-db-credentials 
               key: DB_USER
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: lloyds-db-credentials # Must match the name of your Secret
+              name: lloyds-db-credentials
               key: DB_PASSWORD
         - name: DB_NAME
           value: "lloyds_api_db"
@@ -39,7 +38,7 @@ spec:
           value: "127.0.0.1"
         - name: DB_PORT
           value: "5432"
-        resources: # Optional: Define resource requests and limits
+        resources: 
           requests:
             memory: "64Mi"
             cpu: "100m" # 0.25 CPU core
@@ -53,7 +52,7 @@ spec:
           - "--port=5432"
           - "lloyds-api-123:europe-west2:lloyds-db-instance"
         securityContext:
-          runAsNonRoot: true # Run as non-root user
+          runAsNonRoot: true 
         resources:
           requests:
             memory: "20Mi"

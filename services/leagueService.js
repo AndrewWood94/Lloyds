@@ -1,4 +1,4 @@
-const pool = require('../db'); // Import the shared pool
+const pool = require('../db'); 
 
 async function findLeagueID(leagueName, leagueCountry) {
   const existingLeaguesByName = await pool.query(
@@ -29,7 +29,7 @@ async function findLeagueID(leagueName, leagueCountry) {
       return {
         errorDetail: {
           message: `Multiple leagues exist with name "${leagueName}". Please provide league_country to specify.`,
-          status: 400 // Bad request, as more info is needed
+          status: 400 
         }
       };
     }

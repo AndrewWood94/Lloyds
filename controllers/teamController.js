@@ -1,4 +1,4 @@
-const pool = require('../db'); // Import the shared pool
+const pool = require('../db'); 
 const { toTitleCase } = require('../utils');
 const leagueService = require('../services/leagueService')
 
