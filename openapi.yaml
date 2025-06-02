@@ -1,0 +1,280 @@
+openapi: 3.0.0
+info:
+  title: LLoyds API
+  version: v1.0.0
+  description: API for managing football leagues and teams.
+  contact:
+    name: Andrew Wood
+    url: andrewssite.xyz
+  license:
+    name: MIT
+
+servers:
+  - url: https://api.andrewssite.xyz
+    description: Production server
+  - url: http://localhost:3000
+    description: Development server
+
+paths:
+  /api/leagues:
+    get: 
+      summary: List leagues
+      description: Get a list of leagues, optionally filtered by country.
+      tags: 
+        - Leagues
+      parameters:
+        - in: query
+          name: country
+          description: Filter leagues by country.
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of leagues.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/League'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a new league
+      description: Create a new league with the provided name and country.
+      tags: 
+        - Leagues
+      requestBody:
+        description: The league to object to create.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LeagueInput'
+      responses:
+        '201':
+          description: The created league.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/League'
+        '400':
+          description: Bad request, object invalid (e.g. missing required fields)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflict, league with the same name and country already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'               
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/teams:
+    get: 
+      summary: List teams
+      description: Get a list of teams, optionally filtered by country or league name.
+      tags: 
+        - Teams
+      parameters:
+        - in: query
+          name: country
+          description: Filter teams by country.
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: league_name
+          description: Filter teams by league name.
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of teams, and their corresponding league information.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Team'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a new team  
+      description: Create a new team with the provided name, in the specified league.
+      tags: 
+        - Teams
+      requestBody:
+        description: The team to object to create.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamInput'
+      responses:
+        '201':
+          description: The created team.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamOutput'
+        '400':
+          description: Bad request, object invalid (e.g. missing required fields)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not found (e.g league not found in specified country)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflict, team with the same name already exists in the league
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'               
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
+components:
+  schemas:
+    League:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The unique identifier of the league.
+          example: 1
+          readOnly: true
+          format: int64
+        name:
+          type: string
+          description: The name of the league.
+          example: Premier League
+        country:
+          type: string
+          description: The country of the league.
+          example: England
+        created_at:
+          type: string
+          description: The date and time when the league was created.
+          readOnly: true
+          format: date-time
+    LeagueInput:
+      type: object
+      required:
+        - name
+        - country
+      properties:
+        name:
+          type: string
+          description: The name of the league.
+          example: Premier League
+        country:
+          type: string
+          description: The country of the league.
+          example: England
+    Team:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The unique identifier of the team.
+          example: 1
+          readOnly: true
+          format: int64
+        team_name:
+          type: string
+          description: The name of the team.
+          example: Arsenal
+        created_at:
+          type: string
+          description: The date and time when the team was created.
+          readOnly: true
+          format: date-time 
+        league_name:
+          type: string
+          description: The name of the league the team is in.
+          example: Premier League   
+        league_country:
+          type: string
+          description: The country the team's league is in.
+          example: England
+    TeamInput:
+      type: object
+      required:
+        - name
+        - league_name
+      properties:
+        name:
+          type: string
+          description: The name of the team to add.
+          example: Arsenal
+        league_name:
+          type: string
+          description: The name of the league to add the team to.
+          example: Premier League
+        league_country:
+          type: string
+          description: The country of the league which the team should be added to.
+          example: England
+    TeamOutput:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The unique identifier of the created team.
+          example: 1
+          readOnly: true
+          format: int64
+        name:
+          type: string
+          description: The name of the created team.
+          example: Arsenal
+        league_id:
+          type: integer
+          description: The unique identifier of the league the team is in.
+          example: 1
+          readOnly: true
+          format: int64
+        created_at:
+          type: string
+          description: The date and time when the team was created.
+          readOnly: true
+          format: date-time 
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: A message describing the error.
+          example: Resource not found
+
+
+
+
+    
