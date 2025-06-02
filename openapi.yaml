@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: LLoyds API
-  version: v1.0.0
+  version: v1.0.3
   description: API for managing football leagues and teams.
   contact:
     name: Andrew Wood
