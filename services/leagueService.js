@@ -1,56 +1,66 @@
 const pool = require('../db'); 
 
 async function findLeagueID(leagueName, leagueCountry) {
-  const existingLeaguesByName = await pool.query(
+  const {rows: existingLeaguesByName } = await pool.query(
     'SELECT id, name, country FROM leagues WHERE name = $1',
     [leagueName]
   );
-  if (existingLeaguesByName.rows.length === 0) {
-    return { errorDetail: { message: `No league found with name: "${leagueName}"`, status: 404 } };
-  }
 
-  else if (existingLeaguesByName.rows.length === 1) {
-    const foundLeague = existingLeaguesByName.rows[0];
+  //No leagues found with name
+  if (existingLeaguesByName.length === 0) {
+    return { 
+      errorDetail: { 
+        message: `No league found with name: "${leagueName}"`, 
+        status: 404, 
+      } 
+    }
+  };
+
+  //One league found with name
+  if (existingLeaguesByName.length === 1) {
+    const foundLeague = existingLeaguesByName[0];
     // If a country was provided for the team's league, it must match the found league's country
     if (leagueCountry && leagueCountry.toLowerCase() !== foundLeague.country.toLowerCase() ) {
       return {
         errorDetail: {
           message: `League "${leagueName}" exists, but not in country "${leagueCountry}". It is in "${foundLeague.country || 'N/A'}".`,
-          status: 404
+          status: 404,
         }
       };
     }
-    // If only one league found, and no (or correct) country given, assume it is the right league
+    // Country matches or not specified so it is the right league
     return { league_id: foundLeague.id };
   }
 
-  else{
-    // Multiple leagues found with the same name, no country is given
-    if (!leagueCountry) {
-      return {
-        errorDetail: {
-          message: `Multiple leagues exist with name "${leagueName}". Please provide league_country to specify.`,
-          status: 400 
-        }
-      };
-    }
-  }
-
-  // Multiple leagues found with the same name, select the one that matches the country given
-  const specificLeague = existingLeaguesByName.rows.find(
-    l => l.country && l.country.toLowerCase() === leagueCountry.toLowerCase()
-  );
-
-  if (!specificLeague) {
-    // Multiple leagues found with the same name, none match country given
-    const availableCountries = existingLeaguesByName.rows.map(l => l.country).filter(Boolean).join(', ');
+  // Multiple leagues found with the same name
+  
+  // If no country is given
+  if (!leagueCountry) {
     return {
       errorDetail: {
-        message: `League "${leagueName}" found, but not in country "${leagueCountry}". Available in: ${availableCountries || 'N/A'}.`,
-        status: 404
+        message: `Multiple leagues exist with name "${leagueName}". Please provide league_country to specify.`,
+        status: 400, 
       }
     };
   }
+  
+  // Select the league that matches the country given
+  const specificLeague = existingLeaguesByName.find(
+    l => l.country && l.country.toLowerCase() === leagueCountry.toLowerCase()
+  );
+
+  // Country given doesn't match existing league countries
+  if (!specificLeague) {
+    const availableCountries = existingLeaguesByName.map(l => l.country).filter(Boolean).join(', ');
+    return {
+      errorDetail: {
+        message: `League "${leagueName}" found, but not in country "${leagueCountry}". Available in: ${availableCountries || 'N/A'}.`,
+        status: 404,
+      }
+    };
+  }
+
+  // Return matched league
   return { league_id: specificLeague.id };
 
 }
