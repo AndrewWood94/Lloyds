@@ -16,6 +16,29 @@ servers:
     description: Development server
 
 paths:
+  /api:
+    get:
+      summary: API Welcome Message
+      description: Returns a welcome message for the API.
+      tags:
+        - General
+      responses:
+        '200':
+          description: Successful response with a welcome message.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Welcome to the API to track football leagues and teams!
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /api/leagues:
     get: 
       summary: List leagues
