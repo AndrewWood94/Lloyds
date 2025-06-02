@@ -10,5 +10,9 @@
   },
   "scripts": {
     "test": "jest"
+  },
+  "jest": {
+    "setupFilesAfterEnv": ["<rootDir>/__tests__/jest.setup.js"],
+    "testPathIgnorePatterns": ["<rootDir>/__tests__/jest.setup.js"]
   }
 }

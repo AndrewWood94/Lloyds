@@ -18,28 +18,6 @@ jest.mock('../../services/leagueService', () => ({
   findLeagueID: jest.fn(), 
 }));
 
-// Helper for mock Express response
-const mockResponse = () => {
-    const res = {};
-    res.status = jest.fn().mockReturnValue(res);
-    res.json = jest.fn().mockReturnValue(res);
-    return res;
-  };
-
-function temporarilyMockConsoleError(testFn) {
-  return async(...args) => {
-    const originalError = console.error;
-    console.error = jest.fn();
-    try {
-      await testFn(...args);
-    } catch (err) {
-      throw err;
-    } finally {
-      console.error = originalError;
-    }
-  };
-}
-
 describe('Team Controller', () => {
   let req;
   let res;

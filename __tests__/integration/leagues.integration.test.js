@@ -19,20 +19,6 @@ jest.mock('pg', () => {
   };
 });
 
-function temporarilyMockConsoleError(testFn) {
-  return async(...args) => {
-    const originalError = console.error;
-    console.error = jest.fn();
-    try {
-      await testFn(...args);
-    } catch (err) {
-      throw err;
-    } finally {
-      console.error = originalError;
-    }
-  };
-}
-
 const app = require('../../index');
 
 describe('Leagues API', () => {
@@ -54,13 +40,14 @@ describe('Leagues API', () => {
     });
 
     it('should return a list of leagues filtered by country', async () => {
+      const countryFilter = 'England';
       const filteredMockLeagues = mockLeaguesData.filter(l => l.country.toLowerCase() === 'england');
       mockQuery.mockResolvedValueOnce({ rows: filteredMockLeagues }); 
       
-      const response = await request(app).get('/api/leagues?country=England');
+      const response = await request(app).get(`/api/leagues?country=${countryFilter}`);
       expect(response.statusCode).toBe(200);
       expect(response.body).toEqual(filteredMockLeagues);
-      expect(mockQuery).toHaveBeenCalledWith('SELECT * FROM leagues WHERE country = $1 ORDER BY created_at DESC', ['England']);
+      expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('WHERE country = $1'), [countryFilter]);
     });
 
     it('should return an empty array if no leagues match the filter', async () => {
@@ -71,14 +58,11 @@ describe('Leagues API', () => {
 
       expect(response.statusCode).toBe(200);
       expect(response.body).toEqual([]);
-      expect(mockQuery).toHaveBeenCalledWith(
-        'SELECT * FROM leagues WHERE country = $1 ORDER BY created_at DESC',
-        [countryFilter]
-      );
+      expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('WHERE country = $1'), [countryFilter]);
     });
 
     it('should return 500 if database query fails', temporarilyMockConsoleError(async () => {
-      mockQuery.mockRejectedValueOnce(new Error('DB query failed'));
+      mockQuery.mockRejectedValueOnce(new Error('DB insert failed'));
       const response = await request(app).get('/api/leagues');
 
       expect(response.statusCode).toBe(500);

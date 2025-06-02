@@ -1,6 +1,6 @@
 const leagueController = require('../../controllers/leagueController');
 const pool = require('../../db');
-const { toTitleCase } = require('../../utils'); // This will also be the mock
+const { toTitleCase } = require('../../utils'); 
 
 // Mock the db pool
 jest.mock('../../db', () => ({
@@ -11,30 +11,6 @@ jest.mock('../../db', () => ({
 jest.mock('../../utils', () => ({
     toTitleCase: jest.fn(str => str),
   }));
-
-  // Helper for mock Express response
-const mockResponse = () => {
-    const res = {};
-    res.status = jest.fn().mockReturnValue(res);
-    res.json = jest.fn().mockReturnValue(res);
-    return res;
-  };
-
-//Mock expected console errors
-function temporarilyMockConsoleError(testFn) {
-  return async(...args) => {
-    const originalError = console.error;
-    console.error = jest.fn();
-    try {
-      await testFn(...args);
-    } catch (err) {
-      throw err;
-    } finally {
-      console.error = originalError;
-    }
-  };
-}
-
 
 describe('League Controller', () => {
     let req;
