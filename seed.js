@@ -27,7 +27,7 @@ const createTables = async () => {
     CREATE TABLE IF NOT EXISTS leagues (
       id SERIAL PRIMARY KEY,
       name CITEXT NOT NULL,
-      country CITEXT,
+      country CITEXT NOT NULL,
       created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
       UNIQUE (name, country)
     )
