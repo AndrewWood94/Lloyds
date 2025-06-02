@@ -14,11 +14,16 @@ const dbConfig = {
 const pool = new Pool(dbConfig);
 
 const createTables = async () => {
+
+  // Enable the citext extension if it doesn't already exist
+  await pool.query('CREATE EXTENSION IF NOT EXISTS citext;');
+  console.log("Ensured 'citext' extension is enabled.");
+
   await pool.query(`
     CREATE TABLE IF NOT EXISTS leagues (
       id SERIAL PRIMARY KEY,
-      name VARCHAR(255) NOT NULL,
-      country VARCHAR(255),
+      name CITEXT NOT NULL,
+      country CITEXT,
       created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
       UNIQUE (name, country)
     )
@@ -28,7 +33,7 @@ const createTables = async () => {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS teams (
       id SERIAL PRIMARY KEY,
-      name VARCHAR(255) NOT NULL,
+      name CITEXT NOT NULL,
       league_id INTEGER REFERENCES leagues(id) ON DELETE CASCADE,
       created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
       UNIQUE (name, league_id)
