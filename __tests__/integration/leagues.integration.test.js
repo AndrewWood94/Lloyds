@@ -61,6 +61,17 @@ describe('Leagues API', () => {
       expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('WHERE country = $1'), [countryFilter]);
     });
 
+    it('should ignore incorrect query parameters like "contry"', async () => {
+      const mockLeagues = mockLeaguesData;
+      mockQuery.mockResolvedValueOnce({ rows: mockLeagues });
+    
+      const response = await request(app).get('/api/leagues?contry=England');
+    
+      expect(response.statusCode).toBe(200);
+      expect(response.body).toEqual(mockLeagues);
+      expect(mockQuery).toHaveBeenCalledWith('SELECT * FROM leagues ORDER BY created_at DESC', []);
+    });
+
     it('should return 500 if database query fails', temporarilyMockConsoleError(async () => {
       mockQuery.mockRejectedValueOnce(new Error('DB insert failed'));
       const response = await request(app).get('/api/leagues');
