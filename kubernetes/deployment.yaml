@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: lloyds-app-container
-        image: europe-west2-docker.pkg.dev/lloyds-api-123/lloyds-repository/lloyds-api-image:v2 
+        image: europe-west2-docker.pkg.dev/lloyds-api-123/lloyds-repository/lloyds-api-image:v1.0.3
         ports:
         - containerPort: 3000 
         env:
@@ -41,10 +41,27 @@ spec:
         resources: 
           requests:
             memory: "64Mi"
-            cpu: "100m" # 0.25 CPU core
+            cpu: "100m" # 0.1 CPU core
           limits:
             memory: "128Mi"
             cpu: "500m" # 0.5 CPU core
+        readinessProbe:
+          httpGet:
+            path: /api 
+            port: 3000
+          initialDelaySeconds: 10 
+          periodSeconds: 10     
+          timeoutSeconds: 5      
+          failureThreshold: 3   
+        livenessProbe:
+          httpGet:
+            path: /api 
+            port: 3000
+          initialDelaySeconds: 20 
+          periodSeconds: 20
+          timeoutSeconds: 5
+          failureThreshold: 3
+
       - name: cloud-sql-proxy
         image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.8.0
         args:
