@@ -12,7 +12,7 @@ async function findLeagueID(leagueName, leagueCountry) {
   else if (existingLeaguesByName.rows.length === 1) {
     const foundLeague = existingLeaguesByName.rows[0];
     // If a country was provided for the team's league, it must match the found league's country
-    if (leagueCountry && leagueCountry !== foundLeague.country ) {
+    if (leagueCountry && leagueCountry.toLowerCase() !== foundLeague.country.toLowerCase() ) {
       return {
         errorDetail: {
           message: `League "${leagueName}" exists, but not in country "${leagueCountry}". It is in "${foundLeague.country || 'N/A'}".`,
@@ -36,7 +36,7 @@ async function findLeagueID(leagueName, leagueCountry) {
   }
 
   const specificLeague = existingLeaguesByName.rows.find(
-    l => l.country && l.country === leagueCountry
+    l => l.country && l.country.toLowerCase() === leagueCountry.toLowerCase()
   );
 
   if (!specificLeague) {
