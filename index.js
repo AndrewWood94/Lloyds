@@ -6,14 +6,14 @@ const port = process.env.PORT || 3000; // Use environment variable for port or d
 const leagueController = require('./controllers/leagueController');
 const teamController = require('./controllers/teamController');
 
+const swaggerUi = require('swagger-ui-express');
+const YAML = require('yamljs');
+const swaggerDocument = YAML.load('./openapi.yaml');
+
 app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.status(200).send('OK');
-});
-
-app.get('/api/hello', (req, res) => {
-  res.json({ message: 'Hello from my Node.js API!' });
+app.get('/api', (req, res) => {
+  res.json({ message: 'Welcome to the API to track football leagues and teams!' });
 });
 
 app.post('/api/leagues', leagueController.createLeague);
@@ -21,6 +21,8 @@ app.get('/api/leagues', leagueController.getLeagues)
 
 app.post('/api/teams', teamController.createTeam);
 app.get('/api/teams', teamController.getTeams);
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 if (require.main === module) {
   app.listen(port, () => {
