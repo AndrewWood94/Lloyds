@@ -2,6 +2,7 @@
   "dependencies": {
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "newman": "^6.2.1",
     "pg": "^8.16.0"
   },
   "devDependencies": {
@@ -12,7 +13,11 @@
     "test": "jest"
   },
   "jest": {
-    "setupFilesAfterEnv": ["<rootDir>/__tests__/jest.setup.js"],
-    "testPathIgnorePatterns": ["<rootDir>/__tests__/jest.setup.js"]
+    "setupFilesAfterEnv": [
+      "<rootDir>/__tests__/jest.setup.js"
+    ],
+    "testPathIgnorePatterns": [
+      "<rootDir>/__tests__/jest.setup.js"
+    ]
   }
 }
