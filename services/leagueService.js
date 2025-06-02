@@ -20,11 +20,12 @@ async function findLeagueID(leagueName, leagueCountry) {
         }
       };
     }
+    // If only one league found, and no (or correct) country given, assume it is the right league
     return { league_id: foundLeague.id };
   }
 
   else{
-    // Multiple leagues found with the same name, country is required for disambiguation
+    // Multiple leagues found with the same name, no country is given
     if (!leagueCountry) {
       return {
         errorDetail: {
@@ -35,11 +36,13 @@ async function findLeagueID(leagueName, leagueCountry) {
     }
   }
 
+  // Multiple leagues found with the same name, select the one that matches the country given
   const specificLeague = existingLeaguesByName.rows.find(
     l => l.country && l.country.toLowerCase() === leagueCountry.toLowerCase()
   );
 
   if (!specificLeague) {
+    // Multiple leagues found with the same name, none match country given
     const availableCountries = existingLeaguesByName.rows.map(l => l.country).filter(Boolean).join(', ');
     return {
       errorDetail: {
