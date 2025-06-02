@@ -5,3 +5,19 @@ Dockerfile
 .dockerignore
 .git
 .gitignore
+/cloud-sql-proxy
+TODO
+cluster create
+
+# Local environment files
+.env*
+
+# Test files and directories
+__tests__/
+__fixtures__/
+
+# Other development/tooling artifacts
+/postman/
+/kubernetes/
+seed.js
+README.md
