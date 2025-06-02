@@ -1,4 +1,3 @@
-// /home/awood15/personal/Lloyds/seed.js
 require('dotenv').config(); // Load environment variables from .env file
 const { Pool } = require('pg');
 const { toTitleCase } = require('./utils'); 
@@ -18,6 +17,11 @@ const createTables = async () => {
   // Enable the citext extension if it doesn't already exist
   await pool.query('CREATE EXTENSION IF NOT EXISTS citext;');
   console.log("Ensured 'citext' extension is enabled.");
+
+  // Drop tables if they exist to ensure a clean re-seed
+  await pool.query('DROP TABLE IF EXISTS teams CASCADE;');
+  await pool.query('DROP TABLE IF EXISTS leagues CASCADE;');
+  console.log("Dropped existing tables (if any).");
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS leagues (
