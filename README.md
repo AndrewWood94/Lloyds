@@ -82,8 +82,8 @@ npm test
 
 ### API Tests (Postman/Newman)
 
-The Postman collection is located at `/postman/LLoyds_API.postman_collection.json`.
-The provided environment file (`LLoyds_API.postman_environment.json`) defines `baseURL=http://localhost:3000`, but this can be set manually. If tests are to be re-run, the database must be reseeded each time to reset the test data. Running tests on the production environment will likely result in test failures as the data consistency is not guaranteed.
+The Postman collection is located at `/postman/Lloyds_API.postman_collection.json`.
+The provided environment file (`Local_Development.postman_environment.json`) defines `baseURL=http://localhost:3000`, but this can be set manually. If tests are to be re-run, the database must be reseeded each time to reset the test data. Running tests on the production environment will likely result in test failures as the data consistency is not guaranteed.
 
 1. **Ensure your API server is running:** `node index.js`  
 2. **Reset the database:** `node seed.js`
@@ -96,11 +96,11 @@ The provided environment file (`LLoyds_API.postman_environment.json`) defines `b
 
     - ***Using Newman:***
         ```bash
-        npx newman run ./postman/LLoyds_API.postman_collection.json -e ./postman/LLoyds_API.postman_environment.json
+        npx newman run ./postman/Lloyds_API.postman_collection.json -e ./postman/Local_Development.postman_environment.json
         ```
         Alternatively, to set environment variables directly:
         ```bash
-        npx newman run ./postman/LLoyds_API.postman_collection.json --env-var "baseURL=http://localhost:3000"
+        npx newman run ./postman/Lloyds_API.postman_collection.json --env-var "baseURL=http://localhost:3000"
         ```
 
 ## Example API Requests (curl)
