@@ -18,14 +18,12 @@ The primary API endpoints are `/api/leagues` and `/api/teams`. Refer to the API 
 
 - Node.js (v18 or later recommended)
 - npm (usually comes with Node.js)
-- Docker (for building images, optional for local development if not containerizing)
-- **PostgreSQL Server:**
-    - You'll need a running PostgreSQL instance. You can install it directly on your system (see [PostgreSQL official downloads](https://www.postgresql.org/download/)) or run it easily using Docker.
-    - For Docker, a simple way to start a PostgreSQL container is:
+- Docker (optional for local development if not containerizing)
+- PostgreSQL Server:
+    - You'll need a running PostgreSQL instance. You can install it directly on your system (see [PostgreSQL official downloads](https://www.postgresql.org/download/)) or run it with Docker:
       ```bash
       docker run --name lloyds-postgres -e POSTGRES_PASSWORD=your_chosen_password -p 5432:5432 -d postgres
       ```
-      *(Remember to use a secure password and adjust environment variables as needed for your `.env` file.)*
 - `gcloud` CLI (for GCP deployment, optional for local development)
 - Postman or Newman (for running Postman tests)
 
@@ -87,23 +85,23 @@ npm test
 The Postman collection is located at `/postman/LLoyds_API.postman_collection.json`.
 The provided environment file (`LLoyds_API.postman_environment.json`) defines `baseURL=http://localhost:3000`, but this can be set manually. If tests are to be re-run, the database must be reseeded each time to reset the test data. Running tests on the production environment will likely result in test failures as the data consistency is not guaranteed.
 
-Ensure your API server is running. `node index.js`
-Reset the database `node seed.js`
+1. **Ensure your API server is running:** `node index.js`  
+2. **Reset the database:** `node seed.js`
+3. **Run the tests:**
+    - ***Using Postman Desktop App:***
+        - Import the collection into Postman.
+        - Import or create an environment in Postman, ensuring the `baseURL` variable is set (e.g., `http://localhost:3000` for local, `https://api.andrewssite.xyz` for production).
+        - Select the appropriate environment in Postman.
+        - Run the collection.
 
-1.  **Using Postman Desktop App:**
-    - Import the collection into Postman.
-    - Import or create an environment in Postman, ensuring the `baseURL` variable is set (e.g., `http://localhost:3000` for local, `https://api.andrewssite.xyz` for production).
-    - Select the appropriate environment in Postman.
-    - Run the collection.
-
-2.  **Using Newman:**
-    ```bash
-    npx newman run ./postman/LLoyds_API.postman_collection.json -e ./postman/LLoyds_API.postman_environment.json
-    ```
-    Alternatively, to set environment variables directly:
-    ```bash
-    npx newman run ./postman/LLoyds_API.postman_collection.json --env-var "baseURL=http://localhost:3000"
-    ```
+    - ***Using Newman:***
+        ```bash
+        npx newman run ./postman/LLoyds_API.postman_collection.json -e ./postman/LLoyds_API.postman_environment.json
+        ```
+        Alternatively, to set environment variables directly:
+        ```bash
+        npx newman run ./postman/LLoyds_API.postman_collection.json --env-var "baseURL=http://localhost:3000"
+        ```
 
 ## Example API Requests (curl)
 
