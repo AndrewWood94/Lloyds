@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: lloyds-app-container
-        image: europe-west2-docker.pkg.dev/lloyds-api-123/lloyds-repository/lloyds-api-image:v1.0.3
+        image: europe-west2-docker.pkg.dev/lloyds-api-123/lloyds-repository/lloyds-api-image:v1.0.4
         ports:
         - containerPort: 3000 
         env:
