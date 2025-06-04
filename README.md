@@ -154,26 +154,24 @@ gcloud container clusters create your-cluster-name \
 
     a.  **Ensure your local `.env` file is configured for the Cloud SQL instance.** This means `DB_HOST` should be `localhost` (or `127.0.0.1`), `DB_PORT` should match the port the proxy will listen on (e.g., `5433` or `5432`), and `DB_USER`, `DB_PASSWORD`, and `DB_NAME` should be the credentials for your Cloud SQL database.
         Example `.env` configuration for this:
-        ```env
-        PORT=3000 # Not used by seed script directly, but good to have
-        DB_USER=your_cloud_sql_db_user
-        DB_PASSWORD=your_cloud_sql_db_password
-        DB_NAME=lloyds_api_db # Or your specific Cloud SQL database name
-        DB_HOST=127.0.0.1
-        DB_PORT=5433 # Port for the proxy to listen on
-        ```
-
+    ```env
+    PORT=3000 # Not used by seed script directly, but good to have
+    DB_USER=your_cloud_sql_db_user
+    DB_PASSWORD=your_cloud_sql_db_password
+    DB_NAME=lloyds_api_db # Or your specific Cloud SQL database name
+    DB_HOST=127.0.0.1
+    DB_PORT=5433 # Port for the proxy to listen on
+    ```
     b.  **Start the Cloud SQL Proxy in a separate terminal window.** Replace `your-gcp-project:your-region:your-instance-name` with your actual Cloud SQL instance connection name and ensure the `--port` matches `DB_PORT` in your `.env`.
-        ```bash
-        ./cloud-sql-proxy your-gcp-project:your-region:your-instance-name --port=5433
-        # If cloud-sql-proxy is not in your current directory, you might need to use its full path
-        # or ensure it's in your system's PATH.
-        ```
-
+    ```bash
+    ./cloud-sql-proxy your-gcp-project:your-region:your-instance-name --port=5433
+    # If cloud-sql-proxy is not in your current directory, you might need to use its full path
+    # or ensure it's in your system's PATH.
+    ```
     c.  **Run the seed script in your project directory:**
-        ```bash
-        node seed.js
-        ```
+    ```bash
+    node seed.js
+    ```
     d.  Once seeding is complete, you can stop the Cloud SQL Proxy (Ctrl+C in its terminal).
     
 ## Running Tests
