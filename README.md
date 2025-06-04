@@ -18,13 +18,14 @@ The primary API endpoints are `/api/leagues` and `/api/teams`. Refer to the API 
 
 - Node.js (v18 or later recommended)
 - npm (usually comes with Node.js)
-- Docker (optional for local development if not containerizing)
+- Docker (optional for local development, required for GCP development)
 - PostgreSQL Server:
-    - You'll need a running PostgreSQL instance. You can install it directly on your system (see [PostgreSQL official downloads](https://www.postgresql.org/download/)) or run it with Docker:
+    - You'll need a running PostgreSQL instance. You can install it directly on your system (see [PostgreSQL official downloads](https://www.postgresql.org/download/)) or run it easily using Docker:
       ```bash
       docker run --name lloyds-postgres -e POSTGRES_PASSWORD=your_chosen_password -p 5432:5432 -d postgres
       ```
 - `gcloud` CLI (for GCP deployment, optional for local development)
+- `kubectl` CLI (for Kubernetes interaction, required for GCP deployment)
 - Postman or Newman (for running Postman tests)
 
 ### Local Development Setup
@@ -71,6 +72,110 @@ The primary API endpoints are `/api/leagues` and `/api/teams`. Refer to the API 
     ```
     The API should now be running, typically at `http://localhost:3000`.
 
+## GCP Deployment
+
+### GCP Prerequisites
+
+-   **Google Cloud Project:** An active GCP project with billing enabled.
+-   **GKE Cluster:** A running GKE cluster (Standard or Autopilot). Ensure the cluster has Workload Identity enabled or the node pool service account has the necessary permissions to connect to Cloud SQL (Cloud SQL Client role).
+-   **Cloud SQL for PostgreSQL Instance:** A running Cloud SQL for PostgreSQL instance. Note its instance connection name (e.g., `your-gcp-project:your-region:your-instance-name`).
+-   **Artifact Registry or Container Registry:** A repository to store your Docker images (e.g., `europe-west2-docker.pkg.dev/your-gcp-project/your-repository`).
+-   **Static External IP Address:** A reserved global static external IP address in your GCP project for the Ingress. Note its name (e.g., `lloyds-api-static-ip`).
+-   **Cloud SQL Proxy:** The `cloud-sql-proxy` executable is required to connect to the Cloud SQL instance from your local machine for tasks like seeding. Download it from the official Google Cloud documentation.
+-   **DNS Configuration:** A DNS A record pointing your desired domain (e.g., `api.andrewssite.xyz`) to the reserved static IP address.
+
+#### Create GKE Cluster (Optional)
+
+If you don't already have a GKE cluster, you can create one using the `gcloud` CLI. This command creates a basic cluster suitable for this application. Remember to replace placeholders like `your-gcp-project-id`, `your-cluster-name`, and `your-cluster-region`.
+
+```bash
+gcloud container clusters create your-cluster-name \
+    --project=your-gcp-project-id \
+    --location=your-cluster-region \
+    --machine-type=e2-small \
+    --enable-ip-alias \
+    --release-channel=regular \
+    --scopes=https://www.googleapis.com/auth/cloud-platform \
+    --enable-autoscaling --min-nodes=1 --max-nodes=3
+```
+*Note: Adjust machine type, node count, region, and other settings based on your needs and budget.*
+
+
+### Deployment Steps
+
+1.  **Authenticate `gcloud` and `kubectl`:**
+    Ensure your `gcloud` CLI is authenticated and configured for your project and cluster.
+    ```bash
+    gcloud auth login
+    gcloud config set project your-gcp-project-id
+    gcloud container clusters get-credentials your-cluster-name --region your-cluster-region
+    ```
+
+2.  **Build and Push Docker Image:**
+    Build the Docker image for your application and push it to your chosen container registry. Replace placeholders with your actual project ID, repository name, and desired image tag.
+    ```bash
+    docker build -t europe-west2-docker.pkg.dev/your-gcp-project/your-repository/lloyds-api-image:latest .
+    docker push europe-west2-docker.pkg.dev/your-gcp-project/your-repository/lloyds-api-image:latest
+    ```
+    *Update the image tag in `kubernetes/deployment.yaml` if you use a different tag.*
+
+3.  **Create Database Credentials Secret:**
+    Create the Kubernetes Secret containing your database username and password. **Do not commit secrets directly to Git.** Use `kubectl create secret generic` or apply a YAML file with base64 encoded data (as in `kubernetes/db-credentials-secret.yaml`, but ensure you handle the actual secret values securely).
+    ```bash
+    # Example using kubectl (replace with your actual username and password)
+    # kubectl create secret generic lloyds-db-credentials --from-literal=DB_USER='your_db_user' --from-literal=DB_PASSWORD='your_db_password'
+    
+    # Or apply the provided YAML (ensure base64 values are correct and handled securely)
+    kubectl apply -f kubernetes/db-credentials-secret.yaml
+    ```
+
+4.  **Apply Kubernetes Manifests:**
+    Apply the Kubernetes configuration files. Ensure you have updated `kubernetes/ingress.yaml` with your static IP name and domain, `kubernetes/managed-certificate.yaml` with your domain, and `kubernetes/deployment.yaml` with your image path and Cloud SQL instance connection name.
+    ```bash
+    kubectl apply -f kubernetes/backend-config.yaml
+    kubectl apply -f kubernetes/service.yaml
+    kubectl apply -f kubernetes/deployment.yaml
+    kubectl apply -f kubernetes/managed-certificate.yaml
+    kubectl apply -f kubernetes/ingress.yaml
+    ```
+
+5.  **Monitor Deployment and Ingress:**
+    Monitor the status of your deployment, pods, and Ingress. It may take several minutes for the Ingress and Managed Certificate to become active and the load balancer to provision.
+    ```bash
+    kubectl get deployments
+    kubectl get pods
+    kubectl get services
+    kubectl get ingress lloyds-api-ingress
+    kubectl describe ingress lloyds-api-ingress
+    kubectl get managedcertificates lloyds-api-certificate
+    ```
+6.  **Seed the Cloud SQL Database (Optional):**
+    If you need to seed your newly deployed Cloud SQL database, you can run the `seed.js` script locally, connecting to your Cloud SQL instance via the Cloud SQL Proxy.
+
+    a.  **Ensure your local `.env` file is configured for the Cloud SQL instance.** This means `DB_HOST` should be `localhost` (or `127.0.0.1`), `DB_PORT` should match the port the proxy will listen on (e.g., `5433` or `5432`), and `DB_USER`, `DB_PASSWORD`, and `DB_NAME` should be the credentials for your Cloud SQL database.
+        Example `.env` configuration for this:
+        ```env
+        PORT=3000 # Not used by seed script directly, but good to have
+        DB_USER=your_cloud_sql_db_user
+        DB_PASSWORD=your_cloud_sql_db_password
+        DB_NAME=lloyds_api_db # Or your specific Cloud SQL database name
+        DB_HOST=127.0.0.1
+        DB_PORT=5433 # Port for the proxy to listen on
+        ```
+
+    b.  **Start the Cloud SQL Proxy in a separate terminal window.** Replace `your-gcp-project:your-region:your-instance-name` with your actual Cloud SQL instance connection name and ensure the `--port` matches `DB_PORT` in your `.env`.
+        ```bash
+        ./cloud-sql-proxy your-gcp-project:your-region:your-instance-name --port=5433
+        # If cloud-sql-proxy is not in your current directory, you might need to use its full path
+        # or ensure it's in your system's PATH.
+        ```
+
+    c.  **Run the seed script in your project directory:**
+        ```bash
+        node seed.js
+        ```
+    d.  Once seeding is complete, you can stop the Cloud SQL Proxy (Ctrl+C in its terminal).
+    
 ## Running Tests
 
 ### Unit and Integration Tests (Jest)
